@@ -1,0 +1,38 @@
+alias kaws='kubectl --kubeconfig kubeconfig_eks-cluster'
+
+# create namespace
+kaws create ns nodejs
+
+# deploy application
+kaws apply -f ../sample-nodejs-app/kube/deployment.yml -n nodejs
+
+# expose application
+kaws apply -f ../sample-nodejs-app/kube/svc.yml -n nodejs
+
+# test on local computer
+kaws port-forward pod/sample-app-65bbcb9fbb-76nnb 3000:3000 -n nodejs
+
+# update image version
+kaws set image deployment/sample-app sample-app=filiphaftekah/sample-nodejs-app:0.0.2 -n nodejs
+
+# create a secret
+kaws apply -f ../sample-nodejs-app/kube/user-secret.yml -n nodejs
+
+# use a  user secret - uncomment in deployment
+kaws apply -f ../sample-nodejs-app/kube/deployment.yml -n nodejs
+
+# create test secret from file
+kaws create secret generic test --from-file=../sample-nodejs-app/kube/test.conf -n nodejs
+
+# use test secret as volume in deployment - uncomment volume part
+kaws apply -f ../sample-nodejs-app/kube/deployment.yml -n nodejs
+
+# comunication between apps
+kaws get svc -n nodejs
+kaws run -it ubuntu --image=ubuntu -n nodejs bash
+apt-get update
+apt-get install -y curl
+
+curl http://sample-app # error - hangs
+curl http://sample-app:3000/hello
+curl http://sample-app.nodejs.svc.cluster.local:3000/hello
