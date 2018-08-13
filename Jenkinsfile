@@ -1,6 +1,6 @@
 pipeline {
     environment { 
-        APP_VERSION = appVersion(env.BUILD_ID, env.CLOUD_TYPE)
+        APP_VERSION = Long.toString(System.currentTimeSeconds())
     }
     agent any
 
