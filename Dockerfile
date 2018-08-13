@@ -1,13 +1,14 @@
-FROM node:9.7.1-alpine
+FROM node:8.6-slim AS builder
 
-WORKDIR /usr/src/app
+ARG appVersion=latest
 
-COPY package.json ./
+COPY . /app
+RUN npm install && npm rebuild
 
-RUN npm install
+FROM node:8.6-slim
+COPY . /app
+COPY --from=builder /app/node_modules /app/src/node_modules
+ENV APP_VERSION=${appVersion}
+WORKDIR /app
 
-COPY . .
-
-EXPOSE 3000
-
-CMD [ "npm", "start" ]
+CMD ["npm","start"]
