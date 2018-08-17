@@ -2,7 +2,13 @@ def label = "mypod-${UUID.randomUUID().toString()}"
 podTemplate(label: label, containers: [
     containerTemplate(name: 'node7', image: 'node:7-alpine', ttyEnabled: true, command: 'cat'),
     containerTemplate(name: 'node8', image: 'node:8-alpine', ttyEnabled: true, command: 'cat'),
-    containerTemplate(name: 'kaniko', image: 'gcr.io/kaniko-project/executor:debug', ttyEnabled: true, command: '/busybox/cat')
+    containerTemplate(name: 'kaniko', image: 'gcr.io/kaniko-project/executor:debug', ttyEnabled: true, command: '/busybox/cat',
+    envVars: [
+        containerEnvVar(name: 'GOOGLE_APPLICATION_CREDENTIALS', '/secret/kaniko-secret.json')
+    ]),
+    volumes: [
+        secretVolume(secretName: 'kaniko-secret', mountPath: '/secret')
+    ]
   ]) {
 
     node(label) {
@@ -34,7 +40,7 @@ podTemplate(label: label, containers: [
             container(name: 'kaniko', shell: '/busybox/sh') {
                 stage('build and push on kaniko') {
                     sh '''#!/busybox/sh
-                        /kaniko/executor -f `pwd`/Dockerfile -c `pwd` --insecure-skip-tls-verify --destination=eu.gcr.io/lucky-nature-179207/metrics-app:0.0.10
+                        /kaniko/executor -f `pwd`/Dockerfile -c `pwd` --insecure-skip-tls-verify --destination=eu.gcr.io/lucky-nature-179207/metrics-app:$label
                         '''
                 }
             }
