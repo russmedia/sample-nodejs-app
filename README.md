@@ -46,5 +46,3 @@ docker build -t russmedia/sample-nodejs-app:0.0.1  --build-arg user=towa .
 docker-compose up -d # run container
 docker exec -it sample-nodejs-app_app_1 env | grep USER
 ```
-
-3. 
