@@ -1,0 +1,24 @@
+# linter, tests and package app
+FROM node:10-alpine AS build
+WORKDIR /usr/src/app
+COPY package.json ./
+RUN npm install
+COPY . .
+# i.e. npm test, npm linter etc
+
+
+# build production node_modules
+FROM node:10-alpine AS dependencies
+WORKDIR /usr/src/app
+COPY package.json ./
+RUN npm install --production
+
+
+# production lightweight image
+FROM node:10-alpine as production
+WORKDIR /usr/src/app
+COPY --from=dependencies /usr/src/app/node_modules node_modules
+COPY --from=dependencies /usr/src/app/package.json .
+COPY --from=build /usr/src/app/app.js .
+EXPOSE 3000
+CMD [ "npm", "start" ]

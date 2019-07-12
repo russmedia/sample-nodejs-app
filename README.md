@@ -46,3 +46,13 @@ docker build -t russmedia/sample-nodejs-app:0.0.1  --build-arg user=towa .
 docker-compose up -d # run container
 docker exec -it sample-nodejs-app_app_1 env | grep USER
 ```
+
+## Multi-stage docker image
+- run
+```
+docker build -t russmedia/sample-nodejs-app:0.0.1-multistage -f Dockerfile-multistage .
+```
+- change in docker-compose.yaml image to `russmedia/sample-nodejs-app:0.0.1-multistage` and run:
+```
+docker-compose up
+```
